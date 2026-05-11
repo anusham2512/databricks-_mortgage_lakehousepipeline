@@ -1,0 +1,17 @@
+# Airflow
+logs/
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Docker
+postgres_db/
+
+# OS
+.DS_Store
+
+# Data files
+*.csv
+*.parquet
