@@ -1,0 +1,7 @@
+apache-airflow==2.7.0
+pyspark==3.4.0
+delta-spark==2.4.0
+pandas==2.0.0
+numpy==1.24.0
+psycopg2-binary==2.9.7
+requests==2.31.0
