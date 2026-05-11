@@ -21,15 +21,15 @@ Raw mortgage data comes in as a CSV. The pipeline picks it up, runs it through a
 
 # Project Structure
 mortgage-lakehouse-pipeline/
-├── databricks/
-│   ├── 01_raw_layer.py           # Ingest source data into Delta
-│   ├── 02_refined_layer.py       # Clean, validate, quality checks
-│   └── 03_curated_layer.py       # Final features for loan analysis
-├── dags/
-│   └── mortgage_pipeline.py      # Airflow DAG definition
-├── docker-compose.yml            # Airflow + Postgres setup
-├── requirements.txt
-└── README.md
+-databricks/
+   01_raw_layer.py           # Ingest source data into Delta
+   02_refined_layer.py       # Clean, validate, quality checks
+  03_curated_layer.py       # Final features for loan analysis
+-dags/
+   mortgage_pipeline.py      # Airflow DAG definition
+-docker-compose.yml            # Airflow + Postgres setup
+-requirements.txt
+- README.md
 
 
 
