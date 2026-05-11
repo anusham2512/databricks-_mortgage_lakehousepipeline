@@ -75,7 +75,7 @@ Airflow DAG
 
 ### Step 1 — Clone the repo
 
-git clone https://github.com/your-username/mortgage-lakehouse-pipeline.git
+git clone https://github.com/anusham2512/mortgage-lakehouse-pipeline.git
 cd mortgage-lakehouse-pipeline
 
 
