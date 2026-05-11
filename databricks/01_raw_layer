@@ -1,0 +1,71 @@
+# Databricks notebook source
+import pandas as pd
+import numpy as np
+from pyspark.sql import SparkSession
+
+np.random.seed(42)
+n = 5000
+
+df_pandas = pd.DataFrame({
+    'loan_id': [f'LN{str(i).zfill(6)}' for i in range(1, n+1)],
+    'applicant_income': np.random.randint(30000, 200000, n).astype(float),
+    'loan_amount': np.random.randint(50000, 800000, n).astype(float),
+    'loan_term': np.random.choice([180, 240, 360], n),
+    'credit_score': np.random.randint(580, 850, n).astype(float),
+    'property_type': np.random.choice(['Single Family', 'Condo', 'Multi Family', 'Townhouse'], n),
+    'loan_purpose': np.random.choice(['Purchase', 'Refinance', 'Home Improvement'], n),
+    'state': np.random.choice(['TX', 'CA', 'FL', 'NY', 'IL'], n),
+    'action_taken': np.random.choice([1, 2, 3], n, p=[0.65, 0.25, 0.10]),
+    'interest_rate': np.round(np.random.uniform(3.5, 8.5, n), 2),
+    'debt_to_income': np.round(np.random.uniform(10, 55, n), 1),
+    'lien_status': np.random.choice([1, 2], n),
+})
+
+# Introduce nulls for data quality
+df_pandas.loc[np.random.choice(n, 200), 'credit_score'] = None
+df_pandas.loc[np.random.choice(n, 150), 'debt_to_income'] = None
+df_pandas.loc[np.random.choice(n, 100), 'applicant_income'] = None
+
+# Convert directly to Spark dataframe — no file system needed
+df_raw = spark.createDataFrame(df_pandas)
+
+print(f"Rows loaded: {df_raw.count()}")
+print(f"Columns: {len(df_raw.columns)}")
+df_raw.printSchema()
+
+# COMMAND ----------
+
+# Create schema if not exists
+spark.sql("CREATE CATALOG IF NOT EXISTS main")
+spark.sql("CREATE SCHEMA IF NOT EXISTS main.default")
+spark.sql("USE CATALOG main")
+spark.sql("USE SCHEMA default")
+print("Catalog and schema ready")
+
+# COMMAND ----------
+
+from pyspark.sql.functions import current_timestamp, lit
+
+# Add pipeline metadata columns
+df_raw_with_meta = df_raw \
+    .withColumn("_ingestion_timestamp", current_timestamp()) \
+    .withColumn("_source_file", lit("mortgage.csv")) \
+    .withColumn("_layer", lit("raw"))
+
+# Save to Unity Catalog (no DBFS needed)
+df_raw_with_meta.write \
+    .format("delta") \
+    .mode("overwrite") \
+    .saveAsTable("main.default.mortgage_raw")
+
+print(f"Raw layer written successfully")
+print(f"Total rows: {df_raw_with_meta.count()}")
+
+# COMMAND ----------
+
+# Verify the table
+df_check = spark.sql("SELECT * FROM main.default.mortgage_raw LIMIT 5")
+df_check.display()
+
+# Row count
+spark.sql("SELECT COUNT(*) as total_rows FROM main.default.mortgage_raw").display()
